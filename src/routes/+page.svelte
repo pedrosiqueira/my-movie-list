@@ -89,7 +89,11 @@
 	}
 
 	async function searchMovie() {
-		if (busy || moviesCandidates.length === 0) return;
+		if (busy) return;
+		if (moviesCandidates.length === 0) {
+			location.reload();
+			return;
+		}
 		busy = true;
 		candidates = moviesCandidates.pop();
 		searchMovieModal.show();
@@ -196,18 +200,8 @@
 					<ul class="dropdown-menu">
 						<!-- to-do em vez de chumbar os status, colocar um for-each com resultados trazidos da tabela Status do banco -->
 
-						<form
-							action="?/add"
-							method="post"
-							use:enhance={() => {
-								searchMovieModal.hide();
-								return async ({ result, update }) => {
-									console.log(data);
-									data.movies = [...data.movies, result.data.movie];
-									await update();
-								};
-							}}
-						>
+						<!-- prettier-ignore -->
+						<form action="?/add" method="post" use:enhance={() => { searchMovieModal.hide(); }} >
 							<input type="hidden" name="choosen" value={candidates[active]?.id} />
 							<li><button class="dropdown-item" type="submit" name="status" value="1. To download">1. To download</button></li>
 							<li><button class="dropdown-item" type="submit" name="status" value="2. To watch">2. To watch</button></li>
