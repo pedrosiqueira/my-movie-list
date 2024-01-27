@@ -1,0 +1,37 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider          = "postgresql"
+  url               = env("DATABASE_URL")
+  shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
+}
+
+model Status {
+  id     Int    @id @default(autoincrement())
+  status String @unique
+  filmes Filme[]
+}
+
+model Filme {
+  id                       String      @id
+  ano                      Int      
+  tituloOriginal           String   
+  titulo                   String?  
+  sinopse                  String?  
+  synopsis                 String?  
+  classificacaoIndicativa  String?  
+  avaliacaoIMDB            Float?   
+  avaliacaoMetascore       Int?     
+  avaliacaoTomatometer     Int?     
+  avaliacaoTomatoAudicence Int?     
+  urlCapa                  String?      
+  status                   Status   @relation(fields: [statusId], references: [id])
+  statusId                 Int
+  createdAt                DateTime @default(now())
+  updatedAt                DateTime @updatedAt
+}
