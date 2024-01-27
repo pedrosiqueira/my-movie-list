@@ -1,4 +1,5 @@
 <script>
+	import { enhance } from '$app/forms';
 	import { onMount } from 'svelte';
 
 	let moviesString = '';
@@ -36,7 +37,8 @@
 			searchMovie();
 		});
 
-		document.querySelectorAll('.dropdown-item').forEach((element) => {
+		document.querySelectorAll('.change-movie-status-button').forEach((element) => {
+			// parei aqui
 			element.addEventListener('click', async (event) => {
 				let movieStatus = event.target.textContent;
 				const url = `https://www.imdb.com/title/${candidates[active].id}/`;
@@ -94,8 +96,12 @@
 	}
 </script>
 
+<nav class="navbar navbar-expand-lg bg-body-tertiary">
+	<div class="container-fluid">
+		<a class="navbar-brand" href="/" data-sveltekit-reload>My Movie List</a>
+	</div>
+</nav>
 <div class="container-fluid">
-	<h1>My Movie List</h1>
 	<span id="searchFilterSpan" class="input-group">
 		<textarea id="searchFilterTA" class="form-control" placeholder="Movie's name" rows="1" data-bs-toggle="tooltip" data-bs-title="You can paste multiple lines, one for each movie" bind:value={moviesString} />
 		<button class="btn btn-primary" type="button" id="searchMoviesButton" on:click={searchMovies}>Search on IMDB</button>
@@ -127,15 +133,25 @@
 							<td>{movie.avaliacaoIMDB}</td>
 							<td>{movie.avaliacaoMetascore ?? '-'}</td>
 							<td>
-								{#if movie.status.id === 1}
-									<span data-bs-toggle="tooltip" data-bs-title="A baixar">📥</span>
-								{:else if movie.status.id === 2}
-									<span data-bs-toggle="tooltip" data-bs-title="Por ver">▶️</span>
-								{:else if movie.status.id === 3}
-									<span data-bs-toggle="tooltip" data-bs-title="Visto">✔️</span>
-								{:else}
-									<span data-bs-toggle="tooltip" data-bs-title="Veria de novo">🔄</span>
-								{/if}
+								<div class="btn-group dropstart">
+									<button type="button" class="btn dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+										{#if movie.status.id === 1}
+											<span data-bs-toggle="tooltip" data-bs-title="A baixar">📥</span>
+										{:else if movie.status.id === 2}
+											<span data-bs-toggle="tooltip" data-bs-title="Por ver">▶️</span>
+										{:else if movie.status.id === 3}
+											<span data-bs-toggle="tooltip" data-bs-title="Visto">✔️</span>
+										{:else}
+											<span data-bs-toggle="tooltip" data-bs-title="Veria de novo">🔄</span>
+										{/if}
+									</button>
+									<ul class="dropdown-menu">
+										<li><a class="change-movie-status-button dropdown-item" href="#top">1. To download</a></li>
+										<li><a class="change-movie-status-button dropdown-item" href="#top">2. To watch</a></li>
+										<li><a class="change-movie-status-button dropdown-item" href="#top">3. Watched</a></li>
+										<li><a class="change-movie-status-button dropdown-item" href="#top">4. Would watch again</a></li>
+									</ul>
+								</div>
 							</td>
 						</tr>
 					{/each}
@@ -179,10 +195,25 @@
 					<button id="addMovieButton" class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">Add film</button>
 					<ul class="dropdown-menu">
 						<!-- to-do em vez de chumbar os status, colocar um for-each com resultados trazidos da tabela Status do banco -->
-						<li><a class="dropdown-item" href="#top">1. To download</a></li>
-						<li><a class="dropdown-item" href="#top">2. To watch</a></li>
-						<li><a class="dropdown-item" href="#top">3. Watched</a></li>
-						<li><a class="dropdown-item" href="#top">4. Would watch again</a></li>
+
+						<form
+							action="?/add"
+							method="post"
+							use:enhance={() => {
+								searchMovieModal.hide();
+								return async ({ result, update }) => {
+									console.log(data);
+									data.movies = [...data.movies, result.data.movie];
+									await update();
+								};
+							}}
+						>
+							<input type="hidden" name="choosen" value={candidates[active]?.id} />
+							<li><button class="dropdown-item" type="submit" name="status" value="1. To download">1. To download</button></li>
+							<li><button class="dropdown-item" type="submit" name="status" value="2. To watch">2. To watch</button></li>
+							<li><button class="dropdown-item" type="submit" name="status" value="3. Watched">3. Watched</button></li>
+							<li><button class="dropdown-item" type="submit" name="status" value="4. Would watch again">4. Would watch again</button></li>
+						</form>
 					</ul>
 				</div>
 			</div>

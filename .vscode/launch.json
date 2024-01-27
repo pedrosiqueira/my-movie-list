@@ -1,0 +1,12 @@
+{
+    // https://www.codelantis.com/blog/sveltekit-server-debugging-vscode-webstorm
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "node-terminal",
+            "request": "launch",
+            "name": "Launch SvelteKit server",
+            "command": "pnpm vavite-loader vite dev --port 5173"
+        }
+    ]
+}
