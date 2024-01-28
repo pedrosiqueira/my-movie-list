@@ -21,7 +21,7 @@
 		const tooltipList = [...tooltipTriggerList].map((tooltipTriggerEl) => new bootstrap.Tooltip(tooltipTriggerEl));
 
 		const searchFilterTA = document.getElementById('searchFilterTA');
-		const table = new DataTable('#movieList', { paging: false });
+		const table = new DataTable('#movieList');
 		DataTable.ext.search.push(function (settings, data, dataIndex) {
 			return data.some((el) => convertCaseDiacritic(el).includes(convertCaseDiacritic(searchFilterTA.value)));
 		});
@@ -35,26 +35,6 @@
 		document.getElementById('searchMovieModal')?.addEventListener('hidden.bs.modal', (event) => {
 			busy = false;
 			searchMovie();
-		});
-
-		document.querySelectorAll('.change-movie-status-button').forEach((element) => {
-			// parei aqui
-			element.addEventListener('click', async (event) => {
-				let movieStatus = event.target.textContent;
-				const url = `https://www.imdb.com/title/${candidates[active].id}/`;
-				fetch('/api/database', {
-					method: 'POST',
-					body: JSON.stringify({ url, movieStatus }),
-					headers: {
-						'content-type': 'application/json'
-					}
-				})
-					.then((response) => response.json())
-					.then((result) => {
-						data.movies = [...data.movies, result.movie];
-					});
-				searchMovieModal.hide();
-			});
 		});
 	});
 
@@ -70,13 +50,7 @@
 		const moviesList = moviesString.trim().split('\n');
 		for (let movie of moviesList) {
 			const url = `https://www.imdb.com/find/?q=${encodeURIComponent(movie)}&ref_=nv_sr_sm`;
-			fetch('/api/imdb', {
-				method: 'POST',
-				body: JSON.stringify({ url }),
-				headers: {
-					'content-type': 'application/json'
-				}
-			})
+			fetch(`/api/imdb/?url=${encodeURIComponent(url)}`)
 				.then((response) => response.json())
 				.then((candidates) => {
 					moviesCandidates.push(candidates);
@@ -89,11 +63,7 @@
 	}
 
 	async function searchMovie() {
-		if (busy) return;
-		if (moviesCandidates.length === 0) {
-			location.reload();
-			return;
-		}
+		if (busy || moviesCandidates.length === 0) return;
 		busy = true;
 		candidates = moviesCandidates.pop();
 		searchMovieModal.show();
@@ -124,6 +94,7 @@
 						<th data-bs-toggle="tooltip" data-bs-title="Nota dos usuários IMDB">👍</th>
 						<th data-bs-toggle="tooltip" data-bs-title="Metascore">🎓</th>
 						<th>Status</th>
+						<th>Ações</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -150,12 +121,22 @@
 										{/if}
 									</button>
 									<ul class="dropdown-menu">
-										<li><a class="change-movie-status-button dropdown-item" href="#top">1. To download</a></li>
-										<li><a class="change-movie-status-button dropdown-item" href="#top">2. To watch</a></li>
-										<li><a class="change-movie-status-button dropdown-item" href="#top">3. Watched</a></li>
-										<li><a class="change-movie-status-button dropdown-item" href="#top">4. Would watch again</a></li>
+										<!-- prettier-ignore -->
+										<form action="?/edit" method="post" use:enhance={() => { searchMovieModal.hide(); }} >
+											<input type="hidden" name="id" value={movie.id} />
+											<li><button class="dropdown-item" type="submit" name="status" value="1. To download">1. To download</button></li>
+											<li><button class="dropdown-item" type="submit" name="status" value="2. To watch">2. To watch</button></li>
+											<li><button class="dropdown-item" type="submit" name="status" value="3. Watched">3. Watched</button></li>
+											<li><button class="dropdown-item" type="submit" name="status" value="4. Would watch again">4. Would watch again</button></li>
+										</form>
 									</ul>
 								</div>
+							</td>
+							<td>
+								<form action="?/delete" method="post" use:enhance>
+									<a class="btn p-0" data-bs-toggle="tooltip" data-bs-title="Open on IMDB" href="https://www.imdb.com/title/{movie.id}/" target="blank">👁️</a>
+									<button class="btn p-0" data-bs-toggle="tooltip" data-bs-title="Delete movie" onclick="return confirm('Are you sure you want to delete?');" type="submit" name="id" value={movie.id}>🗑️</button>
+								</form>
 							</td>
 						</tr>
 					{/each}

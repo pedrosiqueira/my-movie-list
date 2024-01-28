@@ -7,7 +7,7 @@ export async function load() {
 }
 
 export const actions = {
-	add: async ({ request, fetch }) => {
+	add: async ({ request }) => {
 		const data = await request.formData();
 		const url = `https://www.imdb.com/title/${data.get('choosen')}/`;
 		const movieStatus = data.get('status');
@@ -38,5 +38,19 @@ export const actions = {
 			console.error(err)
 			return fail(500, { message: "Could not insert the movie." })
 		}
+	},
+	edit: async ({ request }) => {
+		const data = await request.formData();
+		const movie = await prisma.filme.update({
+			where: { id: data.get('id'), },
+			data: { status: { connect: { status: data.get('status') } } },
+			include: { status: true }
+		})
+		return movie
+	},
+	delete: async ({ request }) => {
+		const data = await request.formData();
+		const movie = await prisma.filme.delete({ where: { id: data.get('id'), } })
+		return movie
 	}
 };

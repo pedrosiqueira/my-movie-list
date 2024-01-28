@@ -1,13 +1,9 @@
 <script>
+	import { enhance } from '$app/forms';
 	export let form;
 	console.log(form);
-	let active = 1;
-	let candidates = [{ nome: 'maria' }, { nome: 'francisca' }, { nome: 'joão' }];
+	let movie = { id: 'tt3235888' };
 </script>
 
-<div class="dropdown">
-	<button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false"> Dropdown button </button>
-	<ul class="dropdown-menu">
-		<form method="POST" action="?/create"></form>
-	</ul>
-</div>
+<a href="https://www.imdb.com/title/{movie.id}/">👁️</a>
+<a onclick="return confirm('Are you sure you want to delete?');" name="id" value={movie.id}>🗑️</a>
