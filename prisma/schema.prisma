@@ -24,7 +24,7 @@ model Filme {
   titulo                   String?  
   sinopse                  String?  
   synopsis                 String?  
-  classificacaoIndicativa  String?  
+  classificacaoIndicativa  Int?  
   avaliacaoIMDB            Float?   
   avaliacaoMetascore       Int?     
   avaliacaoTomatometer     Int?     

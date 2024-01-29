@@ -14,6 +14,9 @@ export const actions = {
 
 		let imdbData = (await fetchIMDB(url)).props.pageProps.aboveTheFoldData
 
+		if (imdbData.certificate.rating == 'Livre') imdbData.certificate.rating = 0
+		imdbData.certificate.rating = Number(imdbData.certificate.rating)
+
 		try {
 			const movie = await prisma.filme.create({
 				data: {

@@ -10,27 +10,56 @@
 	let active = 0;
 	let loadingMoviesToast;
 	let searchMovieModal;
-	let myMovieList = [];
+	let current_sorted;
+
 	export let data;
+	// console.log('loaded');
 
 	onMount(() => {
+		document.querySelectorAll('[class*="sortable-"]').forEach((sortable) => {
+			let content = sortable.innerHTML;
+			sortable.innerHTML = '↕' + content;
+			sortable.style.cursor = 'pointer';
+			sortable.addEventListener('click', (el) => {
+				sort(el);
+			});
+		});
+
+		function sort(event) {
+			if (current_sorted && current_sorted != event.target) {
+				current_sorted.textContent = '↕' + current_sorted.textContent.substring(1);
+			}
+			current_sorted = event.target;
+
+			const indexOfSortable = current_sorted.classList.value.indexOf('sortable-');
+			const sortableField = current_sorted.classList.value.slice(indexOfSortable + 9, current_sorted.classList.value.indexOf(' ', indexOfSortable));
+
+			if (current_sorted.textContent[0] == '↓') {
+				data.movies.sort((a, b) => {
+					if (sortableField == 'status') return a.status.id - b.status.id; // pra ordenar um campo que na verdade é um objeto, tive que apelar pro jeitinho, mas o ideal seria fazer algo como está na lista to-do.md
+					if (a[sortableField] < b[sortableField]) return -1;
+					if (a[sortableField] > b[sortableField]) return 1;
+					return 0;
+				});
+				current_sorted.textContent = '↑' + current_sorted.textContent.substring(1);
+			} else {
+				data.movies.sort((a, b) => {
+					if (sortableField == 'status') return b.status.id - a.status.id; // pra ordenar um campo que na verdade é um objeto, tive que apelar pro jeitinho, mas o ideal seria fazer algo como está na lista to-do.md
+					if (a[sortableField] > b[sortableField]) return -1;
+					if (a[sortableField] < b[sortableField]) return 1;
+					return 0;
+				});
+				current_sorted.textContent = '↓' + current_sorted.textContent.substring(1);
+			}
+			data.movies = data.movies;
+		}
+
+		// console.log('mounted');
 		loadingMoviesToast = bootstrap.Toast.getOrCreateInstance(document.getElementById('loadingMoviesToast'));
 		searchMovieModal = bootstrap.Modal.getOrCreateInstance(document.getElementById('searchMovieModal'));
 
 		const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
 		const tooltipList = [...tooltipTriggerList].map((tooltipTriggerEl) => new bootstrap.Tooltip(tooltipTriggerEl));
-
-		const searchFilterTA = document.getElementById('searchFilterTA');
-		const table = new DataTable('#movieList');
-		DataTable.ext.search.push(function (settings, data, dataIndex) {
-			return data.some((el) => convertCaseDiacritic(el).includes(convertCaseDiacritic(searchFilterTA.value)));
-		});
-		searchFilterTA.addEventListener('input', function () {
-			table.draw();
-		});
-		const defaultSearchInput = document.querySelector('div.dataTables_filter');
-		defaultSearchInput.style.display = 'none';
-		defaultSearchInput.parentNode.appendChild(document.getElementById('searchFilterSpan'));
 
 		document.getElementById('searchMovieModal')?.addEventListener('hidden.bs.modal', (event) => {
 			busy = false;
@@ -68,6 +97,8 @@
 		candidates = moviesCandidates.pop();
 		searchMovieModal.show();
 	}
+
+	$: filteredMovies = data.movies.filter((movie) => convertCaseDiacritic(movie.titulo).includes(convertCaseDiacritic(moviesString)));
 </script>
 
 <nav class="navbar navbar-expand-lg bg-body-tertiary">
@@ -76,34 +107,36 @@
 	</div>
 </nav>
 <div class="container-fluid">
-	<span id="searchFilterSpan" class="input-group">
-		<textarea id="searchFilterTA" class="form-control" placeholder="Movie's name" rows="1" data-bs-toggle="tooltip" data-bs-title="You can paste multiple lines, one for each movie" bind:value={moviesString} />
-		<button class="btn btn-primary" type="button" id="searchMoviesButton" on:click={searchMovies}>Search on IMDB</button>
-	</span>
+	<div class="row" style="align-items: center;">
+		<div class="col text-md-start text-center">Showing {filteredMovies.length} of {data.movies.length} movies.</div>
+		<div class="col-md-6">
+			<span id="searchFilterSpan" class="input-group">
+				<textarea id="searchFilterTA" class="form-control" placeholder="Movie's name" rows="1" data-bs-toggle="tooltip" data-bs-title="You can paste multiple lines, one for each movie" bind:value={moviesString} />
+				<button class="btn btn-primary" type="button" id="searchMoviesButton" on:click={searchMovies}>Search on IMDB</button>
+			</span>
+		</div>
+	</div>
 	<div class="row">
 		<div class="col">
-			<table id="movieList" class="table display">
+			<table id="movieList" class="table align-middle">
 				<thead>
 					<tr>
-						<!-- <th>id</th> -->
 						<th>Capa</th>
-						<th>Ano</th>
-						<th>Título</th>
-						<th>Sinopse</th>
-						<th data-bs-toggle="tooltip" data-bs-title="Classificação Indicativa">⚠️</th>
-						<th data-bs-toggle="tooltip" data-bs-title="Nota dos usuários IMDB">👍</th>
-						<th data-bs-toggle="tooltip" data-bs-title="Metascore">🎓</th>
-						<th>Status</th>
+						<th class="sortable-ano">Ano</th>
+						<th class="sortable-titulo">Título</th>
+						<th class="sortable-classificacaoIndicativa" data-bs-toggle="tooltip" data-bs-title="Classificação Indicativa">⚠️</th>
+						<th class="sortable-avaliacaoIMDB" data-bs-toggle="tooltip" data-bs-title="Nota dos usuários IMDB">👍</th>
+						<th class="sortable-avaliacaoMetascore" data-bs-toggle="tooltip" data-bs-title="Metascore">🎓</th>
+						<th class="sortable-status">Status</th>
 						<th>Ações</th>
 					</tr>
 				</thead>
 				<tbody>
-					{#each data.movies as movie}
-						<tr>
+					{#each filteredMovies as movie}
+						<tr class="without-border">
 							<td><img src={movie.urlCapa} alt={movie.titulo} class="avatar" /></td>
 							<td>{movie.ano}</td>
 							<td>{movie.titulo}</td>
-							<td>{movie.sinopse}</td>
 							<td>{movie.classificacaoIndicativa}</td>
 							<td>{movie.avaliacaoIMDB}</td>
 							<td>{movie.avaliacaoMetascore ?? '-'}</td>
@@ -111,23 +144,23 @@
 								<div class="btn-group dropstart">
 									<button type="button" class="btn dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
 										{#if movie.status.id === 1}
-											<span data-bs-toggle="tooltip" data-bs-title="A baixar">📥</span>
+											<span data-bs-toggle="tooltip" data-bs-title="Assistir">▶️</span>
 										{:else if movie.status.id === 2}
-											<span data-bs-toggle="tooltip" data-bs-title="Por ver">▶️</span>
+											<span data-bs-toggle="tooltip" data-bs-title="Baixar">📥</span>
 										{:else if movie.status.id === 3}
-											<span data-bs-toggle="tooltip" data-bs-title="Visto">✔️</span>
+											<span data-bs-toggle="tooltip" data-bs-title="Assistiria de novo">🔄</span>
 										{:else}
-											<span data-bs-toggle="tooltip" data-bs-title="Veria de novo">🔄</span>
+											<span data-bs-toggle="tooltip" data-bs-title="Assistido">✔️</span>
 										{/if}
 									</button>
 									<ul class="dropdown-menu">
 										<!-- prettier-ignore -->
-										<form action="?/edit" method="post" use:enhance={() => { searchMovieModal.hide(); }} >
+										<form action="?/edit" method="post" use:enhance>
 											<input type="hidden" name="id" value={movie.id} />
-											<li><button class="dropdown-item" type="submit" name="status" value="1. To download">1. To download</button></li>
-											<li><button class="dropdown-item" type="submit" name="status" value="2. To watch">2. To watch</button></li>
-											<li><button class="dropdown-item" type="submit" name="status" value="3. Watched">3. Watched</button></li>
-											<li><button class="dropdown-item" type="submit" name="status" value="4. Would watch again">4. Would watch again</button></li>
+											<li><button class="dropdown-item" type="submit" name="status" value="1. To watch">1. To watch</button></li>
+											<li><button class="dropdown-item" type="submit" name="status" value="2. To download">2. To download</button></li>
+											<li><button class="dropdown-item" type="submit" name="status" value="3. Would watch again">3. Would watch again</button></li>
+											<li><button class="dropdown-item" type="submit" name="status" value="4. Watched">4. Watched</button></li>
 										</form>
 									</ul>
 								</div>
@@ -139,6 +172,7 @@
 								</form>
 							</td>
 						</tr>
+						<tr> <td colspan="9"> {movie.sinopse}</td> </tr>
 					{/each}
 				</tbody>
 			</table>
@@ -184,10 +218,10 @@
 						<!-- prettier-ignore -->
 						<form action="?/add" method="post" use:enhance={() => { searchMovieModal.hide(); }} >
 							<input type="hidden" name="choosen" value={candidates[active]?.id} />
-							<li><button class="dropdown-item" type="submit" name="status" value="1. To download">1. To download</button></li>
-							<li><button class="dropdown-item" type="submit" name="status" value="2. To watch">2. To watch</button></li>
-							<li><button class="dropdown-item" type="submit" name="status" value="3. Watched">3. Watched</button></li>
-							<li><button class="dropdown-item" type="submit" name="status" value="4. Would watch again">4. Would watch again</button></li>
+							<li><button class="dropdown-item" type="submit" name="status" value="1. To watch">1. To watch</button></li>
+							<li><button class="dropdown-item" type="submit" name="status" value="2. To download">2. To download</button></li>
+							<li><button class="dropdown-item" type="submit" name="status" value="3. Would watch again">3. Would watch again</button></li>
+							<li><button class="dropdown-item" type="submit" name="status" value="4. Watched">4. Watched</button></li>
 						</form>
 					</ul>
 				</div>
@@ -202,5 +236,16 @@
 		height: 74px;
 		object-fit: cover;
 		margin-right: 10px;
+	}
+
+	.without-border * {
+		/* apply to this and all his descendant */
+		border-style: none;
+		padding-bottom: 0%;
+	}
+
+	.without-border + tr * {
+		/* apply to next sibling of him */
+		padding-top: 0%;
 	}
 </style>

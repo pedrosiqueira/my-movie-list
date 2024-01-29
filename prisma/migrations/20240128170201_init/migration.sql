@@ -19,6 +19,7 @@ CREATE TABLE "Filme" (
     "avaliacaoMetascore" INTEGER,
     "avaliacaoTomatometer" INTEGER,
     "avaliacaoTomatoAudicence" INTEGER,
+    "urlCapa" TEXT,
     "statusId" INTEGER NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
