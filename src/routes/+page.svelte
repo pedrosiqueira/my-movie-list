@@ -82,6 +82,9 @@
 			fetch(`/api/imdb/?url=${encodeURIComponent(url)}`)
 				.then((response) => response.json())
 				.then((candidates) => {
+					candidates = candidates
+						.filter((obj) => obj.imageType == 'movie') // quero apenas movies
+						.filter((obj1) => !data.movies.some((obj2) => obj2.id === obj1.id)); // aqueles já adicionados não vou adicionar
 					moviesCandidates.push(candidates);
 					searchMovie();
 					counter--;
@@ -199,7 +202,7 @@
 						<a href="#top" class="list-group-item list-group-item-action d-flex {index === active ? 'active' : ''} align-items-center" on:click={() => (active = index)}>
 							<img src={candidate.titlePosterImageModel?.url ?? ''} alt={candidate.titleNameText} class="avatar" />
 							<div>
-								<h5 class="mb-0">{candidate.titleNameText} ({candidate.titleReleaseText})</h5>
+								<h5 class="mb-0">{candidate.titleNameText} | {candidate.titleReleaseText}</h5>
 								{#if candidate.topCredits}
 									<p class="mb-0">{candidate.topCredits}</p>
 								{/if}
@@ -211,10 +214,10 @@
 			<div class="modal-footer">
 				<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
 				<div class="btn-group dropup">
-					<button id="addMovieButton" class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">Add film</button>
+					<!-- svelte-ignore a11y-accesskey -->
+					<button id="addMovieButton" class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" accesskey="a">Add film</button>
 					<ul class="dropdown-menu">
 						<!-- to-do em vez de chumbar os status, colocar um for-each com resultados trazidos da tabela Status do banco -->
-
 						<!-- prettier-ignore -->
 						<form action="?/add" method="post" use:enhance={() => { searchMovieModal.hide(); }} >
 							<input type="hidden" name="choosen" value={candidates[active]?.id} />
@@ -232,8 +235,8 @@
 
 <style>
 	.avatar {
-		width: 50px;
-		height: 74px;
+		/* width: 50px; */
+		height: 99px;
 		object-fit: cover;
 		margin-right: 10px;
 	}

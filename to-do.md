@@ -1,4 +1,4 @@
-testar duplicatas
+ao tentar adicionar filme já repetido, voltar com uma mensagem ao usuário, informando que o filme já está adicionado. no momento, não adiciona mas o usuário fica sem saber.
 
 os status estão chumbados. depois tem que carregar os status do banco.
 

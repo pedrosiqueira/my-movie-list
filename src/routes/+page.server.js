@@ -2,7 +2,10 @@ import { prisma } from '$lib/server/prisma.js';
 import { fetchIMDB } from '$lib/server/sharedFunctions.js';
 
 export async function load() {
-	const movies = await prisma.filme.findMany({ include: { status: { select: { id: true } } } })
+	const movies = await prisma.filme.findMany({
+		orderBy: [{ status: { status: 'asc' } }, { ano: 'asc' }],
+		include: { status: { select: { id: true } } }
+	})
 	return { movies }
 }
 
@@ -14,6 +17,7 @@ export const actions = {
 
 		let imdbData = (await fetchIMDB(url)).props.pageProps.aboveTheFoldData
 
+		if (!imdbData.certificate) imdbData.certificate = { rating: -1 };
 		if (imdbData.certificate.rating == 'Livre') imdbData.certificate.rating = 0
 		imdbData.certificate.rating = Number(imdbData.certificate.rating)
 
@@ -38,7 +42,7 @@ export const actions = {
 			})
 			return { movie };
 		} catch (err) {
-			console.error(err)
+			if (err.code = 'P2002') return { error: 'movie already added' }
 			return fail(500, { message: "Could not insert the movie." })
 		}
 	},
