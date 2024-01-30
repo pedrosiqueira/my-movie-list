@@ -82,9 +82,13 @@
 			fetch(`/api/imdb/?url=${encodeURIComponent(url)}`)
 				.then((response) => response.json())
 				.then((candidates) => {
-					candidates = candidates
-						.filter((obj) => obj.imageType == 'movie') // quero apenas movies
-						.filter((obj1) => !data.movies.some((obj2) => obj2.id === obj1.id)); // aqueles já adicionados não vou adicionar, mas talvez fosse melhor marcá-los como sombreados, em vez de escondê-los
+					candidates = candidates.filter((obj) => obj.imageType == 'movie'); // quero apenas movies
+					candidates.forEach((obj1) => {
+						if (data.movies.some((obj2) => obj2.id === obj1.id)) {
+							// se já está adicionado, marque-o como tal
+							obj1.alreadyExists = true;
+						}
+					});
 					moviesCandidates.push(candidates);
 					searchMovie();
 					counter--;
@@ -209,12 +213,19 @@
 				<h3>Filme(s) encontrado(s)</h3>
 				<ul class="list-group">
 					{#each candidates as candidate, index}
-						<a href="#top" class="list-group-item list-group-item-action d-flex {index === active ? 'active' : ''} align-items-center" on:click={() => (active = index)}>
+						<a href="#top" class="list-group-item list-group-item-action d-flex align-items-center {candidate.alreadyExists ? 'disabled' : index === active ? 'active' : ''}" on:click={() => (active = index)}>
 							<img src={candidate.titlePosterImageModel?.url ?? ''} alt={candidate.titleNameText} class="avatar" />
 							<div>
 								<h5 class="mb-0">{candidate.titleNameText} | {candidate.titleReleaseText}</h5>
 								{#if candidate.topCredits}
 									<p class="mb-0">{candidate.topCredits}</p>
+								{/if}
+							</div>
+							<div class="ms-auto align-self-start">
+								{#if candidate.alreadyExists}
+									<span class="badge bg-primary rounded-pill">already added</span>
+								{:else}
+									<small> <a class="btn p-0" data-bs-toggle="tooltip" data-bs-title="Open on IMDB" href="https://www.imdb.com/title/{candidate.id}/" target="blank">👁️</a> </small>
 								{/if}
 							</div>
 						</a>
