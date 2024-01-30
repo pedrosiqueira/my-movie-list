@@ -1,18 +1,25 @@
 import { PrismaClient } from "@prisma/client"
 
+function loadBackupFile(filePath = 'prisma/backupData.json') {
+    try {
+        const data = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+        return data;
+    } catch (error) {
+        console.error('Error reading or parsing the file:', error);
+        return null;
+    }
+}
+
 const prisma = new PrismaClient()
 
 async function main() {
-    const result = await prisma.status.createMany({
-        data: [
-            { status: '1. To watch' },
-            { status: '2. To download' },
-            { status: '3. Would watch again' },
-            { status: '4. Watched' }
-        ]
+    data = loadBackupFile();
+
+    const status = await prisma.status.createMany({
+        data: data.status
     })
 
-    console.log(result)
+    const movies = await prisma.filme.createMany({ data: data.movies })
 }
 
 main()

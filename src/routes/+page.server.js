@@ -17,9 +17,15 @@ export const actions = {
 
 		let imdbData = (await fetchIMDB(url)).props.pageProps.aboveTheFoldData
 
-		if (!imdbData.certificate) imdbData.certificate = { rating: -1 };
-		if (imdbData.certificate.rating == 'Livre') imdbData.certificate.rating = 0
-		imdbData.certificate.rating = Number(imdbData.certificate.rating)
+		if (!imdbData.certificate) imdbData.certificate = { rating: null };
+		else if (imdbData.certificate.rating == 'Livre') imdbData.certificate.rating = 0
+		else if (imdbData.certificate.rating == 'G') imdbData.certificate.rating = 0
+		else if (imdbData.certificate.rating == 'PG') imdbData.certificate.rating = 0
+		else if (imdbData.certificate.rating == 'PG-13') imdbData.certificate.rating = 13
+		else if (imdbData.certificate.rating == 'R') imdbData.certificate.rating = 17
+		else if (imdbData.certificate.rating == 'NC-17') imdbData.certificate.rating = 18
+		else if (imdbData.certificate.rating == 'Not Rated') imdbData.certificate.rating = null
+		else imdbData.certificate.rating = Number(imdbData.certificate.rating)
 
 		try {
 			const movie = await prisma.filme.create({

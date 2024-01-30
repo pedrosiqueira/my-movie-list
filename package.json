@@ -9,7 +9,7 @@
 		"dev": "vite dev",
 		"build": "vite build",
 		"preview": "vite preview",
-		"postinstall": "prisma generate && prisma migrate deploy",
+		"postinstall": "prisma generate && prisma migrate deploy && prisma db seed",
 		"lint": "prettier --check . && eslint .",
 		"format": "prettier --write ."
 	},
