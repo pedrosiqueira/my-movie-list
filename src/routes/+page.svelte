@@ -89,6 +89,7 @@
 							obj1.alreadyExists = true;
 						}
 					});
+					candidates.query = movie;
 					moviesCandidates.push(candidates);
 					searchMovie();
 					counter--;
@@ -210,7 +211,7 @@
 	<div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
 		<div class="modal-content">
 			<div class="modal-body">
-				<h3>Filme(s) encontrado(s)</h3>
+				<h3>Movie(s) found(s) for {candidates.query}:</h3>
 				<ul class="list-group">
 					{#each candidates as candidate, index}
 						<a href="#top" class="list-group-item list-group-item-action d-flex align-items-center {candidate.alreadyExists ? 'disabled' : index === active ? 'active' : ''}" on:click={() => (active = index)}>
