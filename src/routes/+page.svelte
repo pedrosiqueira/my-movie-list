@@ -84,7 +84,7 @@
 				.then((candidates) => {
 					candidates = candidates
 						.filter((obj) => obj.imageType == 'movie') // quero apenas movies
-						.filter((obj1) => !data.movies.some((obj2) => obj2.id === obj1.id)); // aqueles já adicionados não vou adicionar
+						.filter((obj1) => !data.movies.some((obj2) => obj2.id === obj1.id)); // aqueles já adicionados não vou adicionar, mas talvez fosse melhor marcá-los como sombreados, em vez de escondê-los
 					moviesCandidates.push(candidates);
 					searchMovie();
 					counter--;
