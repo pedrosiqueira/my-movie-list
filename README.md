@@ -71,7 +71,7 @@ https://www.prisma.io/docs/orm/prisma-migrate/workflows/seeding#seeding-your-dat
 # Deploying to Vercel
 
 1. Setup prisma: https://www.prisma.io/docs/orm/prisma-client/deployment/serverless/deploy-to-vercel. Although on free account, can't add a separate database for preview deployments.
-    2. To run the migration and seeding, I changed the following line in `package.json`: `"postinstall": "prisma generate && prisma migrate deploy && prisma db seed",`. However, I don't know if it is the most appropriate.
+    2. To run the migration, I changed the following line in `package.json`: `"postinstall": "prisma generate && prisma migrate deploy",`. However, I don't know if it is the most appropriate.
 
 2. Create a Vercel postgres database: https://vercel.com/storage/postgres
     1. Change your prisma datasource according to the Prisma tab of your vercel postgres project.
