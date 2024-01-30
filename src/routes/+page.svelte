@@ -97,7 +97,7 @@
 	async function searchMovie() {
 		if (busy || moviesCandidates.length === 0) return;
 		busy = true;
-		candidates = moviesCandidates.pop();
+		candidates = moviesCandidates.shift();
 		searchMovieModal.show();
 	}
 
