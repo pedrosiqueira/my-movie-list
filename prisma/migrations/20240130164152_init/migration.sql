@@ -1,6 +1,6 @@
 -- CreateTable
 CREATE TABLE "Status" (
-    "id" SERIAL NOT NULL,
+    "id" INTEGER NOT NULL,
     "status" TEXT NOT NULL,
 
     CONSTRAINT "Status_pkey" PRIMARY KEY ("id")
@@ -14,7 +14,7 @@ CREATE TABLE "Filme" (
     "titulo" TEXT,
     "sinopse" TEXT,
     "synopsis" TEXT,
-    "classificacaoIndicativa" TEXT,
+    "classificacaoIndicativa" INTEGER,
     "avaliacaoIMDB" DOUBLE PRECISION,
     "avaliacaoMetascore" INTEGER,
     "avaliacaoTomatometer" INTEGER,

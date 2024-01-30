@@ -1,4 +1,5 @@
 import { PrismaClient } from "@prisma/client"
+import fs from 'fs';
 
 function loadBackupFile(filePath = 'prisma/backupData.json') {
     try {
@@ -13,12 +14,8 @@ function loadBackupFile(filePath = 'prisma/backupData.json') {
 const prisma = new PrismaClient()
 
 async function main() {
-    data = loadBackupFile();
-
-    const status = await prisma.status.createMany({
-        data: data.status
-    })
-
+    const data = loadBackupFile();
+    const status = await prisma.status.createMany({ data: data.status })
     const movies = await prisma.filme.createMany({ data: data.movies })
 }
 
