@@ -101,9 +101,9 @@
 		searchMovieModal.show();
 	}
 
+	$: searchQuery = convertCaseDiacritic(moviesString).replace(/\s+/g, ' '); // substitui qualquer sequência de whitespaces por apenas um espaço
+	$: searchQuerySimple = searchQuery.replace(/\d|\(|\)/g, '').trim(); // sem numeros nem parênteses
 	$: filteredMovies = data.movies.filter((movie) => {
-		const searchQuery = convertCaseDiacritic(moviesString).replace(/\s+/g, ' '); // substitui qualquer sequência de whitespaces por apenas um espaço
-		const searchQuerySimple = searchQuery.replace(/\d|\(|\)/g, ''); // sem numeros nem parênteses
 		return (
 			convertCaseDiacritic(movie.titulo).includes(searchQuery) || // procura pelo titulo
 			convertCaseDiacritic(movie.titulo).includes(searchQuerySimple) ||
