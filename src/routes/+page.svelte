@@ -103,12 +103,12 @@
 
 	$: filteredMovies = data.movies.filter((movie) => {
 		const searchQuery = convertCaseDiacritic(moviesString).replace(/\s+/g, ' '); // substitui qualquer sequência de whitespaces por apenas um espaço
-		const searchQuerySimple = searchQuery.replace(/\d/g, ''); // sem numeros
+		const searchQuerySimple = searchQuery.replace(/\d|\(|\)/g, ''); // sem numeros nem parênteses
 		return (
 			convertCaseDiacritic(movie.titulo).includes(searchQuery) || // procura pelo titulo
-			convertCaseDiacritic(movie.titulo).includes(searchQuerySimple) || // procura pelo titulo desconsiderando números
+			convertCaseDiacritic(movie.titulo).includes(searchQuerySimple) ||
 			convertCaseDiacritic(movie.tituloOriginal).includes(searchQuery) || //procura pelo titulo original
-			convertCaseDiacritic(movie.tituloOriginal).includes(searchQuerySimple) //procura pelo titulo original desconsiderando números
+			convertCaseDiacritic(movie.tituloOriginal).includes(searchQuerySimple)
 		);
 	});
 </script>
@@ -144,7 +144,8 @@
 					</tr>
 				</thead>
 				<tbody>
-					{#each filteredMovies as movie (movie.id)} <!-- https://learn.svelte.dev/tutorial/keyed-each-blocks -->
+					{#each filteredMovies as movie (movie.id)}
+						<!-- https://learn.svelte.dev/tutorial/keyed-each-blocks -->
 						<tr class="without-border">
 							<td><img src={movie.urlCapa} alt={movie.titulo} class="avatar" /></td>
 							<td>{movie.ano}</td>
