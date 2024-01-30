@@ -101,7 +101,16 @@
 		searchMovieModal.show();
 	}
 
-	$: filteredMovies = data.movies.filter((movie) => convertCaseDiacritic(movie.titulo).includes(convertCaseDiacritic(moviesString)));
+	$: filteredMovies = data.movies.filter((movie) => {
+		const searchQuery = convertCaseDiacritic(moviesString).replace(/\s+/g, ' '); // substitui qualquer sequência de whitespaces por apenas um espaço
+		const searchQuerySimple = searchQuery.replace(/\d/g, ''); // sem numeros
+		return (
+			convertCaseDiacritic(movie.titulo).includes(searchQuery) || // procura pelo titulo
+			convertCaseDiacritic(movie.titulo).includes(searchQuerySimple) || // procura pelo titulo desconsiderando números
+			convertCaseDiacritic(movie.tituloOriginal).includes(searchQuery) || //procura pelo titulo original
+			convertCaseDiacritic(movie.tituloOriginal).includes(searchQuerySimple) //procura pelo titulo original desconsiderando números
+		);
+	});
 </script>
 
 <nav class="navbar navbar-expand-lg bg-body-tertiary">
@@ -130,16 +139,16 @@
 						<th class="sortable-classificacaoIndicativa" data-bs-toggle="tooltip" data-bs-title="Classificação Indicativa">⚠️</th>
 						<th class="sortable-avaliacaoIMDB" data-bs-toggle="tooltip" data-bs-title="Nota dos usuários IMDB">👍</th>
 						<th class="sortable-avaliacaoMetascore" data-bs-toggle="tooltip" data-bs-title="Metascore">🎓</th>
-						<th class="sortable-status">Status</th>
+						<th class="sortable-status" data-bs-toggle="tooltip" data-bs-title="Status">⭐</th>
 						<th>Ações</th>
 					</tr>
 				</thead>
 				<tbody>
-					{#each filteredMovies as movie}
+					{#each filteredMovies as movie (movie.id)} <!-- https://learn.svelte.dev/tutorial/keyed-each-blocks -->
 						<tr class="without-border">
 							<td><img src={movie.urlCapa} alt={movie.titulo} class="avatar" /></td>
 							<td>{movie.ano}</td>
-							<td>{movie.titulo}</td>
+							<td><span data-bs-toggle="tooltip" data-bs-title={movie.tituloOriginal}>{movie.titulo}</span></td>
 							<td>{movie.classificacaoIndicativa}</td>
 							<td>{movie.avaliacaoIMDB}</td>
 							<td>{movie.avaliacaoMetascore ?? '-'}</td>
