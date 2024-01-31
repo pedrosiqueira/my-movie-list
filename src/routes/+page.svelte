@@ -1,6 +1,7 @@
 <script>
 	import { enhance } from '$app/forms';
 	import { onMount } from 'svelte';
+	import { convertCaseDiacritic } from '$lib/sharedFunctions.js';
 
 	let moviesString = '';
 	let counter = 0;
@@ -20,28 +21,28 @@
 			let content = sortable.innerHTML;
 			sortable.innerHTML = '↕' + content;
 			sortable.style.cursor = 'pointer';
-			sortable.addEventListener('click', (el) => {
-				sort(el);
+			sortable.addEventListener('click', (event) => {
+				sort(event);
 			});
 		});
 
 		function sort(event) {
-			if (current_sorted && current_sorted != event.target) {
-				current_sorted.textContent = '↕' + current_sorted.textContent.substring(1);
+			if (current_sorted && current_sorted != event.currentTarget) {
+				current_sorted.innerHTML = '↕' + current_sorted.innerHTML.substring(1);
 			}
-			current_sorted = event.target;
+			current_sorted = event.currentTarget;
 
 			const indexOfSortable = current_sorted.classList.value.indexOf('sortable-');
 			const sortableField = current_sorted.classList.value.slice(indexOfSortable + 9, current_sorted.classList.value.indexOf(' ', indexOfSortable));
 
-			if (current_sorted.textContent[0] == '↓') {
+			if (current_sorted.innerHTML[0] == '↓') {
 				data.movies.sort((a, b) => {
 					if (sortableField == 'status') return a.status.id - b.status.id; // pra ordenar um campo que na verdade é um objeto, tive que apelar pro jeitinho, mas o ideal seria fazer algo como está na lista to-do.md
 					if (a[sortableField] < b[sortableField]) return -1;
 					if (a[sortableField] > b[sortableField]) return 1;
 					return 0;
 				});
-				current_sorted.textContent = '↑' + current_sorted.textContent.substring(1);
+				current_sorted.innerHTML = '↑' + current_sorted.innerHTML.substring(1);
 			} else {
 				data.movies.sort((a, b) => {
 					if (sortableField == 'status') return b.status.id - a.status.id; // pra ordenar um campo que na verdade é um objeto, tive que apelar pro jeitinho, mas o ideal seria fazer algo como está na lista to-do.md
@@ -49,7 +50,7 @@
 					if (a[sortableField] < b[sortableField]) return 1;
 					return 0;
 				});
-				current_sorted.textContent = '↓' + current_sorted.textContent.substring(1);
+				current_sorted.innerHTML = '↓' + current_sorted.innerHTML.substring(1);
 			}
 			data.movies = data.movies;
 		}
@@ -66,13 +67,6 @@
 			searchMovie();
 		});
 	});
-
-	function convertCaseDiacritic(str) {
-		return str
-			.normalize('NFKD')
-			.replace(/[\u0300-\u036f]/g, '')
-			.toLowerCase();
-	}
 
 	async function searchMovies() {
 		loadingMoviesToast.show();
@@ -134,7 +128,7 @@
 		</div>
 	</div>
 	<div class="row">
-		<div class="col">
+		<div class="col table-responsive">
 			<table id="movieList" class="table align-middle">
 				<thead>
 					<tr>
@@ -142,10 +136,12 @@
 						<th class="sortable-ano">Ano</th>
 						<th class="sortable-titulo">Título</th>
 						<th class="sortable-classificacaoIndicativa" data-bs-toggle="tooltip" data-bs-title="Classificação Indicativa">⚠️</th>
-						<th class="sortable-avaliacaoIMDB" data-bs-toggle="tooltip" data-bs-title="Nota dos usuários IMDB">👍</th>
-						<th class="sortable-avaliacaoMetascore" data-bs-toggle="tooltip" data-bs-title="Metascore">🎓</th>
+						<th class="sortable-avaliacaoIMDB" data-bs-toggle="tooltip" data-bs-title="IMDB rating"><img style="height: 1em;" src="/icons/imdb_favicon_desktop_32x32._CB1582158068_.png" alt="IMDB rating" /></th>
+						<th class="sortable-avaliacaoMetacritic" data-bs-toggle="tooltip" data-bs-title="Metacritic"><img style="height: 1em;" src="/icons/metacritic_favicon.ico" alt="metacritic rating" /></th>
+						<th class="sortable-avaliacaoTomatometer" data-bs-toggle="tooltip" data-bs-title="Tomatometer"><img style="height: 1em;" src="/icons/tomatometer-fresh.149b5e8adc3.svg" alt="Tomatometer" /></th>
+						<th class="sortable-avaliacaoTomatoAudience" data-bs-toggle="tooltip" data-bs-title="Tomato Audience"><img style="height: 1em;" src="/icons/aud_score-fresh.6c24d79faaf.svg" alt="Tomato Audience" /></th>
 						<th class="sortable-status" data-bs-toggle="tooltip" data-bs-title="Status">⭐</th>
-						<th>Ações</th>
+						<th class="sortable-status" data-bs-toggle="tooltip" data-bs-title="Delete">🚮</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -156,8 +152,14 @@
 							<td>{movie.ano}</td>
 							<td><span data-bs-toggle="tooltip" data-bs-title={movie.tituloOriginal}>{movie.titulo}</span></td>
 							<td>{movie.classificacaoIndicativa}</td>
-							<td>{movie.avaliacaoIMDB}</td>
-							<td>{movie.avaliacaoMetascore ?? '-'}</td>
+							<td> <a data-bs-toggle="tooltip" data-bs-title="Open on IMDB" href="https://www.imdb.com/title/{movie.id}/" target="blank"> {movie.avaliacaoIMDB}</a></td>
+							<td>{movie.avaliacaoMetacritic ?? '-'}</td>
+							<td>
+								{#if movie.urlRottenTomatoes}
+									<a data-bs-toggle="tooltip" data-bs-title="Open on Rotten" href={movie.urlRottenTomatoes} target="blank"> {movie.avaliacaoTomatometer}</a>
+								{:else}-{/if}
+							</td>
+							<td>{movie.avaliacaoTomatoAudience ?? '-'}</td>
 							<td>
 								<div class="btn-group dropstart">
 									<button type="button" class="btn dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
@@ -185,7 +187,6 @@
 							</td>
 							<td>
 								<form action="?/delete" method="post" use:enhance>
-									<a class="btn p-0" data-bs-toggle="tooltip" data-bs-title="Open on IMDB" href="https://www.imdb.com/title/{movie.id}/" target="blank">👁️</a>
 									<button class="btn p-0" data-bs-toggle="tooltip" data-bs-title="Delete movie" onclick="return confirm('Are you sure you want to delete?');" type="submit" name="id" value={movie.id}>🗑️</button>
 								</form>
 							</td>

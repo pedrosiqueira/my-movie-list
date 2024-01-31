@@ -19,19 +19,19 @@ model Status {
 }
 
 model Filme {
-  id                       String      @id
-  ano                      Int      
-  tituloOriginal           String   
-  titulo                   String?  
-  sinopse                  String?  
-  synopsis                 String?  
-  classificacaoIndicativa  Int?  
-  avaliacaoIMDB            Float?   
-  avaliacaoMetascore       Int?     
-  avaliacaoTomatometer     Int?     
-  avaliacaoTomatoAudicence Int?     
-  urlCapa                  String?      
-  status                   Status   @relation(fields: [statusId], references: [id])
+  id                       String @id
+  ano                      Int
+  tituloOriginal           String 
+  titulo                   String?
+  sinopse                  String?
+  classificacaoIndicativa  Int?
+  avaliacaoIMDB            Float?
+  avaliacaoMetacritic      Int?
+  avaliacaoTomatometer     Int?
+  avaliacaoTomatoAudience  Int?
+  urlCapa                  String?
+  urlRottenTomatoes        String?
+  status                   Status @relation(fields: [statusId], references: [id])
   statusId                 Int
   createdAt                DateTime @default(now())
   updatedAt                DateTime @updatedAt

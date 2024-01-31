@@ -1,5 +1,52 @@
 import { prisma } from '$lib/server/prisma.js';
 import { fetchIMDB } from '$lib/server/sharedFunctions.js';
+import { convertCaseDiacritic } from '$lib/sharedFunctions.js';
+
+/**
+ * Considering input = "This is a sample string. StartMarker some content EndMarker", startMarker = "StartMarker", endMarker = "EndMarker" and endOffset = -1, the return is " some content".
+ */
+function extractSubstring(input, startMarker, endMarker, startOffset = 0, endOffset = 0) {
+	const startIndex = input.indexOf(startMarker);
+	const endIndex = input.indexOf(endMarker, startIndex);
+	return input.substring(startIndex + startOffset, endIndex + endOffset);
+}
+
+async function bringRottenTomatoesInfo(url, titles, directors) {
+	let htmlContent = await fetch(url)
+	htmlContent = await htmlContent.text();
+
+	const titleFound = convertCaseDiacritic(extractSubstring(htmlContent, '<h1>', '</h1', 4))
+	if (!titles.some(title => convertCaseDiacritic(title) == titleFound)) return null // o título não bateu
+
+	const directorFound = convertCaseDiacritic(extractSubstring(htmlContent, '<div class="directors">', '<div class="actors">'))
+	if (!directors.some(director => directorFound.includes(convertCaseDiacritic(director)))) return null // o diretor não bateu
+
+	let startIndex = htmlContent.indexOf(`Rotten Tomatoes Critics`)
+	const tomatometer = Number(extractSubstring(htmlContent.substring(startIndex), '<span>', '&', 6))
+	if (!tomatometer) return null // não há avaliação do rotten
+
+	startIndex = htmlContent.indexOf(`Rotten Tomatoes Audience`)
+	const audience = Number(extractSubstring(htmlContent.substring(startIndex), '<span>', '&', 6))
+
+	const rottenUrl = extractSubstring(htmlContent, 'https://www.rottentomatoes.com', '"')
+
+	return { tomatometer, audience, rottenUrl }
+}
+
+async function searchRottenTomatoesInfo(titles, directors, year) {
+	let htmlContent = await fetch(`https://yts.mx/browse-movies/${encodeURIComponent(titles[0])}`);
+	htmlContent = await htmlContent.text();
+	htmlContent = extractSubstring(htmlContent, '<div class="browse-movie-wrap', '</section>', -1)
+	while (htmlContent) { // para cada filme da lista
+		let movieContent = extractSubstring(htmlContent, '<div class="browse-movie-wrap', '<div class="browse-movie-year"', 0, 35)
+		if (movieContent.includes('browse-movie-year">' + year)) { // a lista só mostra os títulos em inglês, portanto, devo entrar em cada título para ver seu nome original
+			const found = await bringRottenTomatoesInfo(extractSubstring(movieContent, 'href="', '" ', 6), titles, directors)
+			if (found) return found
+		}
+		htmlContent = htmlContent.substring(movieContent.length)
+	}
+	return { tomatometer: null, audience: null, rottenUrl: null }
+}
 
 export async function load() {
 	const movies = await prisma.filme.findMany({
@@ -15,7 +62,13 @@ export const actions = {
 		const url = `https://www.imdb.com/title/${data.get('choosen')}/`;
 		const movieStatus = data.get('status');
 
-		let imdbData = (await fetchIMDB(url)).props.pageProps.aboveTheFoldData
+		let imdbData = (await fetchIMDB(url)).props.pageProps
+		const akas = imdbData.mainColumnData.akas.edges.map(item => item.node.text)
+		const directors = imdbData.mainColumnData.directors[0].credits.map(item => item.name.nameText.text)
+		imdbData = imdbData.aboveTheFoldData
+
+		const titles = [imdbData.originalTitleText.text, imdbData.titleText.text, ...akas]
+		const rottenData = await searchRottenTomatoesInfo(titles, directors, imdbData.releaseYear.year);
 
 		if (!imdbData.certificate) imdbData.certificate = { rating: null };
 		else if (imdbData.certificate.rating == 'Livre') imdbData.certificate.rating = 0
@@ -35,13 +88,13 @@ export const actions = {
 					tituloOriginal: imdbData.originalTitleText.text,
 					titulo: imdbData.titleText.text,
 					sinopse: imdbData.plot.plotText.plainText,
-					// synopsis,
 					classificacaoIndicativa: imdbData.certificate.rating,
 					avaliacaoIMDB: imdbData.ratingsSummary.aggregateRating,
-					avaliacaoMetascore: imdbData.metacritic?.metascore.score ?? null,
+					avaliacaoMetacritic: imdbData.metacritic?.metascore.score ?? null,
+					avaliacaoTomatometer: rottenData.tomatometer,
+					avaliacaoTomatoAudience: rottenData.audience,
 					urlCapa: imdbData.primaryImage.url,
-					// avaliacaoTomatometer:filme.,
-					// avaliacaoTomatoAudicence:filme.,
+					urlRottenTomatoes: rottenData.rottenUrl,
 					status: { connect: { status: movieStatus } }
 				},
 				include: { status: true }
