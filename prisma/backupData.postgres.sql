@@ -76,10 +76,20 @@ CREATE TABLE public._prisma_migrations (
 ALTER TABLE public._prisma_migrations OWNER TO mymovielist;
 
 --
+-- Data for Name: Status; Type: TABLE DATA; Schema: public; Owner: mymovielist
+--
+
+INSERT INTO public."Status" VALUES (1, '1. To watch'),
+(2, '2. To download'),
+(3, '3. Would watch again'),
+(4, '4. Watched');
+
+
+--
 -- Data for Name: Filme; Type: TABLE DATA; Schema: public; Owner: mymovielist
 --
 
-INSERT INTO public."Filme" VALUES
+INSERT INTO public."Filme"(id,ano,"tituloOriginal",titulo,sinopse,"classificacaoIndicativa","avaliacaoIMDB","avaliacaoTomatometer","urlCapa","statusId","createdAt","updatedAt","avaliacaoMetacritic","avaliacaoTomatoAudience","urlRottenTomatoes") VALUES
 ('tt0029583', 1937, 'Snow White and the Seven Dwarfs', 'Branca de Neve e os Sete Anões', 'Deixada numa floresta perigosa por sua madrasta malvada, uma princesa é resgatada por sete mineiros anões que a fazem parte de sua casa.', 0, 7.6, 97, 'https://m.media-amazon.com/images/M/MV5BNWQ4N2I1MzctNGU2YS00YzYyLTgyNmEtMTliZTQ5MGYxYzlkXkEyXkFqcGdeQXVyMTAyOTE2ODg0._V1_.jpg', 1, '2024-02-01 00:09:49.009', '2024-02-01 00:09:49.009', 96, 78, 'https://www.rottentomatoes.com/m/snow_white_and_the_seven_dwarfs'),
 ('tt0033563', 1941, 'Dumbo', 'Dumbo', 'Ridicularizado por suas enormes orelhas, um jovem elefante de circo é auxiliado por um rato a alcançar todo o seu potencial.', 0, 7.2, 95, 'https://m.media-amazon.com/images/M/MV5BMmU1NjQ3YjktZGMxYS00N2IwLTllZWQtOGNjYWE4MzgxNzk2XkEyXkFqcGdeQXVyODU2MDg1NzU@._V1_.jpg', 1, '2024-02-01 00:18:00.909', '2024-02-01 00:18:00.909', 96, 70, 'https://www.rottentomatoes.com/m/dumbo'),
 ('tt0032455', 1940, 'Fantasia', 'Fantasia', 'A integração das grandes obras da música clássica com visuais extremamente criativos e originais da animação.', 0, 7.7, 95, 'https://m.media-amazon.com/images/M/MV5BYjhlYzNkOGEtZjNkZC00OTQ4LWJiMzEtMTM3YzBiM2FkMDUxXkEyXkFqcGdeQXVyNzY1NDgwNjQ@._V1_.jpg', 1, '2024-02-01 00:24:55.354', '2024-02-01 00:24:55.354', 96, NULL, 'https://www.rottentomatoes.com/m/fantasia'),
@@ -627,17 +637,7 @@ INSERT INTO public."Filme" VALUES
 ('tt7985704', 2023, 'Operation Fortune: Ruse de Guerre', 'Esquema de Risco - Operação Fortune', 'O agente especial Orson Fortune e sua equipe de agentes recrutam uma das maiores estrelas de cinema de Hollywood para ajudá-los em uma missão secreta quando a venda de uma nova tecnologia de armas ameaça perturbar a ordem mundial.', 14, 6.3, 51, 'https://m.media-amazon.com/images/M/MV5BZTlmNjUzZjktODgyYy00YzFmLWJjYTctY2M0ZDgzNzg2M2E5XkEyXkFqcGdeQXVyMjcwMzM0OTI@._V1_.jpg', 4, '2024-02-01 01:40:16.889', '2024-02-01 01:40:16.889', 51, 82, 'https://www.rottentomatoes.com/m/operation_fortune_ruse_de_guerre'),
 ('tt13287846', 2023, 'Napoleon', 'Napoleão', 'O filme oferece uma visão pessoal das origens de Napoleão e de sua ascensão rápida e implacável ao império, vista através do prisma de seu relacionamento viciante e muitas vezes volátil com sua esposa e verdadeiro amor, Josephine.', 16, 6.5, 58, 'https://m.media-amazon.com/images/M/MV5BODY0Y2M2YzctN2QwZC00NzM4LThiOGQtOWVjZGJmNzJmMGI0XkEyXkFqcGdeQXVyNzAwMjU2MTY@._V1_.jpg', 4, '2024-02-01 01:40:20.932', '2024-02-01 01:40:20.932', 64, 59, 'https://www.rottentomatoes.com/m/napoleon_2023'),
 ('tt11138512', 2022, 'The Northman', 'O Homem do Norte', 'Depois de testemunhar o assassinato do pai pelas mãos do seu tio Fjölnir, e ver sua mãe e reino tomados pelo assassino, o jovem Príncipe Amleth foge para retornar anos depois, já adulto, determinado a fazer justiça.', 18, 7, 90, 'https://m.media-amazon.com/images/M/MV5BMzVlMmY2NTctODgwOC00NDMzLWEzMWYtM2RiYmIyNTNhMTI0XkEyXkFqcGdeQXVyNTAzNzgwNTg@._V1_.jpg', 4, '2024-02-01 01:40:20.934', '2024-02-01 01:40:20.934', 82, 64, 'https://www.rottentomatoes.com/m/the_northman'),
-('tt1292594', 2008, "Front of the Class", "Primeiro da Classe", "Brad Cohen who, despite being challenged by Tourette's Syndrome at a very young age, defies all odds to become a gifted teacher.", 0, 8.1, NULL, 'https://m.media-amazon.com/images/M/MV5BNzkxN2MyMWUtZDI5NS00OTA3LWFiMzUtODYzMmVjODE0ZjM5XkEyXkFqcGdeQXVyNDgyODgxNjE@._V1_.jpg', 4, "2024-01-29 21:29:41.502", "2024-01-29 21:29:41.502", NULL, 82, 'https://www.rottentomatoes.com/m/front_of_the_class');
-
-
---
--- Data for Name: Status; Type: TABLE DATA; Schema: public; Owner: mymovielist
---
-
-INSERT INTO public."Status" VALUES (1, '1. To watch'),
-(2, '2. To download'),
-(3, '3. Would watch again'),
-(4, '4. Watched');
+('tt1292594', 2008, 'Front of the Class', 'Primeiro da Classe', 'Brad Cohen who, despite being challenged by Tourette''s Syndrome at a very young age, defies all odds to become a gifted teacher.', 0, 8.1, NULL, 'https://m.media-amazon.com/images/M/MV5BNzkxN2MyMWUtZDI5NS00OTA3LWFiMzUtODYzMmVjODE0ZjM5XkEyXkFqcGdeQXVyNDgyODgxNjE@._V1_.jpg', 4, '2024-01-29 21:29:41.502', '2024-01-29 21:29:41.502', NULL, 82, 'https://www.rottentomatoes.com/m/front_of_the_class');
 
 
 --
