@@ -16,7 +16,7 @@ const prisma = new PrismaClient()
 async function main() {
     const data = loadBackupFile();
     const status = await prisma.status.createMany({ data: data.status })
-    const movies = await prisma.filme.createMany({ data: data.movies })
+    // const movies = await prisma.filme.createMany({ data: data.movies })
 }
 
 main()
