@@ -1,3 +1,9 @@
+ao colar várias linhas, antes de apertar o botão de buscar no imdb, poderia listar filtrar filmes que correspondam a uma das linhas.
+
+ao procurar um filme, muitas vezes são listados vários. talvez ter o botão de adicionar em cada um dos filmes da lista.
+
+ao procurar um filme já adicionado, ter a opção de alterar seu status dali.
+
 os status estão chumbados. depois tem que carregar os status do banco.
 
 teclas de atalho para o app
